@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: dragon-mailer
-        image: dapper01/test-image:1.0
+        image: dapper01/test-image:1.0.0
         resources:
           requests:
             memory: "512Mi"

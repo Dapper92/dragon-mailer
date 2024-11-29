@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Docker Image
         env:
-          image_name: test-image:1.0
+          image_name: test-image:1.0.0
           version: 1.0.0
           username: dapper01
         run: |
@@ -41,7 +41,7 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         env:
-          image_name: test-image
+          image_name: test-image:1.0.0
           version: 1.0.0
           username: dapper01
         run: |
@@ -57,7 +57,7 @@ jobs:
 
       - name: Scan Docker Image for Vulnerabilities
         env:
-          image_name: test-image:1.0
+          image_name: test-image:1.0.0
           version: 1.0.0
           username: dapper01
         id: trivy-scan
@@ -97,7 +97,7 @@ jobs:
 
       - name: Pull and Deploy Docker Image
         env:
-          image_name: test-image:1.0
+          image_name: test-image:1.0.0
           version: 1.0.0
           username: dapper01
         run: |
