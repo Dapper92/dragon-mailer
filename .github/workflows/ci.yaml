@@ -13,7 +13,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
       - name: Greeting
         run: echo "Hello World users"
 
@@ -61,7 +60,7 @@ jobs:
           version: 1.0.0
           username: dapper01
         id: trivy-scan
-        uses: aquasecurity/trivy-action@v0.21.0  # Updated to a stable version
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: $username/$image_name:$version
           args: --skip-update
