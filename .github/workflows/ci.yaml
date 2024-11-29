@@ -1,11 +1,11 @@
 name: CI/CD Pipeline
 
-on: 
+on:
   push:
-    branches: 
-      - master  # Change 'main' to the branch you want to trigger the action
+    branches:
+      - master  # Change 'master' to the branch you want to trigger the action
 
-jobs: 
+jobs:
   Build:
     name: Build
     runs-on: ubuntu-latest
@@ -13,9 +13,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
       - name: Greeting
-        run: echo "Hello World users"  
+        run: echo "Hello World users"
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -27,7 +26,7 @@ jobs:
 
       - name: Build Docker Image
         env:
-          image_name: test-image:1.0.0
+          image_name: test-image
           version: 1.0.0
           username: dapper01
         run: |
@@ -41,7 +40,7 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         env:
-          image_name: test-image:1.0.0
+          image_name: test-image
           version: 1.0.0
           username: dapper01
         run: |
@@ -57,11 +56,11 @@ jobs:
 
       - name: Scan Docker Image for Vulnerabilities
         env:
-          image_name: test-image:1.0.0
+          image_name: test-image
           version: 1.0.0
           username: dapper01
         id: trivy-scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: $username/$image_name:$version
           args: --skip-update
@@ -74,12 +73,11 @@ jobs:
           echo "Rate limit hit. Retrying after delay..."
           sleep 60  # Delay before retry
           trivy image --skip-update ${username}/${image_name}:${version} || exit 1
-          
+
       - name: Run Tests
         run: |
           echo "Running tests..."
           npm test || { echo 'Tests failed'; exit 1; }
-
 
   Deploy:
     name: Deploy Docker Image
@@ -97,10 +95,9 @@ jobs:
 
       - name: Pull and Deploy Docker Image
         env:
-          image_name: test-image:1.0.0
+          image_name: test-image
           version: 1.0.0
           username: dapper01
         run: |
           docker pull $username/$image_name:$version
           docker run -d -p 8080:80 $username/$image_name:$version
-
