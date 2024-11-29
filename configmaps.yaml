@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dragon-mailer-config-express
+  namespace: another-ns
+data:
+  ME_CONFIG_MONGODB_URL: "mongodb://cm9vdA==:cGFzc3dvcmQ=@mongodb:27017"
