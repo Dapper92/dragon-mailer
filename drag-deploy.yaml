@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dragon-mailer-app
+  namespace: another-ns
+spec:
+  selector:
+    matchLabels:
+      app: dragon-mailer-app
+  template:
+    metadata:
+      labels:
+        app: dragon-mailer-app
+    spec:
+      containers:
+      - name: dragon-mailer
+        image: dapper01/dragon-mailer
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:  # Corrected to lowercase
+              name: mongodb-secrets
+              key: root
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:  # Corrected to lowercase
+              name: mongodb-secrets
+              key: password
+        livenessProbe:  # Corrected capitalization
+          httpGet:
+            path: /healthz
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:  # Corrected capitalization
+          httpGet:
+            path: /readyz
+            port: 3000
+          initialDelaySeconds: 10  # Corrected capitalization
+          periodSeconds: 10  # Corrected capitalization
+          timeoutSeconds: 5  # Corrected capitalization
+          failureThreshold: 3  # Corrected capitalization
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dragon-mailer-app
+  namespace: another-ns
+spec:
+  type: NodePort
+  selector:
+    app: dragon-mailer-app
+  ports:
+  - port: 3000
+    targetPort: 3000
