@@ -22,12 +22,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: mongodb-secrets
-              key: MONGO_INITDB_ROOT_USERNAME  # Changed "Key" to "key"
+              key: MONGO_INITDB_ROOT_USERNAME  
         - name: MONGO_INITDB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mongodb-secrets
-              key: MONGO_INITDB_ROOT_PASSWORD  # Changed "Key" to "key"
+              key: MONGO_INITDB_ROOT_PASSWORD  
 ---
 apiVersion: v1
 kind: Service
