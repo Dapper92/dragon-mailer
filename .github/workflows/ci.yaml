@@ -12,4 +12,4 @@ jobs:
       - name: Greet user
         run: echo "Welcome Mr Dapo"
       - name: Build image
-        run: docker build -t dapper92/practice-image:1
+        run: docker build -t dapper92/practice-image:1 .
