@@ -1,33 +1,40 @@
 name: Mailer-Deployment
+
 on:
   push:
     branches:
        - master
+
 jobs:
   Build:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v4
+
       - name: Greet user
         run: echo "Welcome Mr Dapo"
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'  # Set the Node.js version you want
 
-      # Install dependencies
       - name: Install dependencies
         run: npm install
-      - name: Build image
-        run: docker build -t dapper92/practice-image:1 .
-      - name: "Login to dockerhub"
-        run: |
-         echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login  -u ${{ secrets.DOCKERHUB_USERNAME }}  --password-stdin
 
-      - name: "Push image to dockerhub"
-        run : |
-          docker push dapper01/practice-image:1
+      - name: Build image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1 .
+
+      - name: Verify Docker images
+        run: docker images  # List images to verify the build
+
+      - name: Login to Docker Hub
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1
+
       - name: Cache Trivy DB
         uses: actions/cache@v3
         with:
@@ -48,39 +55,38 @@ jobs:
           args: --skip-update
         continue-on-error: true  # Allow retries on rate limiting
 
-      # Retry Mechanism if Rate Limited
       - name: Retry Trivy Scan if Rate Limited
         if: failure()
         run: |
           echo "Rate limit hit. Retrying after delay..."
           sleep 60  # Delay before retry
           trivy image --skip-update ${username}/${image_name}:${version} || exit 1
-          
+
       - name: Run Tests
         run: |
           echo "Running tests..."
           npm test || { echo 'Tests failed'; exit 1; }
-        #upload artifact  
+
+      # Upload artifact  
       - name: Create a File
-        run: echo "hello from ${{ matrix.runs-on }}" > file-${{ matrix.runs-on }}.txt
+        run: echo "hello from Build job" > file-Build.txt
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-         name: my-artifact-${{ matrix.runs-on }}
-         path: file-${{ matrix.runs-on }}.txt  
+          name: my-artifact-Build
+          path: file-Build.txt
 
-         #Download artifact
   Deploy:
-    needs: Build
+    needs: Build  # Corrected dependency to Build job
     runs-on: ubuntu-latest
     steps:
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: my-artifact
-        pattern: my-artifact-*
-        merge-multiple: true
-    - run: ls -R my-artifact
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: my-artifact
+          pattern: my-artifact-*
+          merge-multiple: true
 
-      
-
+      - run: ls -R my-artifact
+s
