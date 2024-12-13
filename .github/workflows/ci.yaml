@@ -82,12 +82,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           #  Write the SSH private key to a file
-
-          ssh-add ssh_key 
-          mkdir -p ~/.ssh
-          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts 
-          ssh -o StrictHostKeyChecking=no ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com 
+          
           echo "$SSH_PRIVATE_KEY" > ssh_key
           chmod 600 ssh_key  # Make sure the key has the right permissions
           ssh -o StrictHostKeyChecking=no ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com '
