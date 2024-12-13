@@ -1,4 +1,4 @@
-name: "Mailer-Deployment"
+name: Mailer-Deployment
 on:
   push:
     branches:
@@ -70,7 +70,7 @@ jobs:
          path: file-${{ matrix.runs-on }}.txt  
          #Download artifact
   Deploy:
-    needs: "Mailer-Deployment"
+    needs: Mailer-Deployment
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifacts
