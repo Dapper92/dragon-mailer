@@ -89,4 +89,3 @@ jobs:
           merge-multiple: true
 
       - run: ls -R my-artifact
-s
