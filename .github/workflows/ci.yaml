@@ -3,8 +3,7 @@ name: simple ci
 on: 
   push:
     branches:
-      - main
-
+      - master
 jobs:
   simple-ci:
     strategy:
