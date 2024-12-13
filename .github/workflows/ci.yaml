@@ -11,5 +11,61 @@ jobs:
         uses: actions/checkout@v4
       - name: Greet user
         run: echo "Welcome Mr Dapo"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Set the Node.js version you want
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
       - name: Build image
         run: docker build -t dapper92/practice-image:1 .
+      - name: "Login to dockerhub"
+        run: |
+         echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login  -u ${{ secrets.DOCKERHUB_USERNAME }}  --password-stdin
+
+      - name: "Push image to dockerhub"
+        run : |
+          docker push dapper92/practice-image:1
+      - name: Cache Trivy DB
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+          restore-keys: |
+            ${{ runner.os }}-trivy-db
+
+      - name: Scan Docker Image for Vulnerabilities
+        env:
+          image_name: practice-image
+          version: 1
+          username: dapper01
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: $username/$image_name:$version
+          args: --skip-update
+        continue-on-error: true  # Allow retries on rate limiting
+
+      # Retry Mechanism if Rate Limited
+      - name: Retry Trivy Scan if Rate Limited
+        if: failure()
+        run: |
+          echo "Rate limit hit. Retrying after delay..."
+          sleep 60  # Delay before retry
+          trivy image --skip-update ${username}/${image_name}:${version} || exit 1
+          
+      - name: Run Tests
+        run: |
+          echo "Running tests..."
+          npm test || { echo 'Tests failed'; exit 1; }
+        #upload artifact  
+      - name: Create a File
+        run: echo "hello from ${{ matrix.runs-on }}" > file-${{ matrix.runs-on }}.txt
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+         name: my-artifact-${{ matrix.runs-on }}
+         path: file-${{ matrix.runs-on }}.txt  
+
