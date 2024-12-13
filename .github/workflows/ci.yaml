@@ -82,24 +82,31 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           #  Write the SSH private key to a file
-          
+
+
           echo "$SSH_PRIVATE_KEY" > ssh_key
-          chmod 600 ssh_key  # Make sure the key has the right permissions
-          ssh -o StrictHostKeyChecking=no ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com '
+           chmod 600 ssh_key  # Make sure the key has the right permissions
+           eval "$(ssh-agent -s)"
+
+          ssh-add ssh_key 
+          mkdir -p ~/.ssh
+           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+           chmod 600 ~/.ssh/known_hosts 
+           ssh -o StrictHostKeyChecking=no ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com '
 
           sudo apt-get update &&
           sudo apt-get install -y ca-certificates curl &&
           sudo install -m 0755 -d /etc/apt/keyrings &&
           sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc &&
-          sudo chmod a+r /etc/apt/keyrings/docker.asc &&
+          sudo chmod a+r /etc/apt/keyrings/docker.asc  &&
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
           sudo apt-get update &&
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
           sudo docker system prune -a --force &&
           sudo docker image prune -a --force &&
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1 &&
-          sudo docker run -d -p 8080:3002 ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1
-
+          sudo docker run -d -p 80:3002 ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1
+          
           '
 
 
