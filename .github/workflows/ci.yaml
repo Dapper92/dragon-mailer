@@ -68,10 +68,10 @@ jobs:
         with:
          name: my-artifact-${{ matrix.runs-on }}
          path: file-${{ matrix.runs-on }}.txt  
-         
+
          #Download artifact
   Deploy:
-    needs: Mailer-Deployment
+    needs: Build
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifacts
