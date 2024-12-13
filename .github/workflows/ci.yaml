@@ -27,7 +27,7 @@ jobs:
 
       - name: "Push image to dockerhub"
         run : |
-          docker push dapper92/practice-image:1
+          docker push dapper01/practice-image:1
       - name: Cache Trivy DB
         uses: actions/cache@v3
         with:
@@ -68,4 +68,18 @@ jobs:
         with:
          name: my-artifact-${{ matrix.runs-on }}
          path: file-${{ matrix.runs-on }}.txt  
+         #Download artifact
+  Deploy:
+    needs: simple-ci
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: my-artifact
+        pattern: my-artifact-*
+        merge-multiple: true
+    - run: ls -R my-artifact
+
+      
 
