@@ -4,3 +4,4 @@ WORKDIR /usr/share/html
 
 COPY . /usr/share/nginx/html
 
+EXPOSE  3000
