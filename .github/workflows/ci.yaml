@@ -5,11 +5,8 @@ on:
     branches:
       - master
 jobs:
-  simple-ci:
-    strategy:
-      matrix:
-        runs-on: [ubuntu-latest]
-    runs-on: ${{ matrix.runs-on }}
+  stepper:
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
