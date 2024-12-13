@@ -89,6 +89,9 @@ jobs:
            eval "$(ssh-agent -s)"
 
           ssh-add ssh_key 
+          mkdir -p ~/.ssh
+           echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+           chmod 600 ~/.ssh/known_hosts 
           ssh -o StrictHostKeyChecking=no ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com << 'EOF'
 
           sudo apt-get update
