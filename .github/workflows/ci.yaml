@@ -3,7 +3,7 @@ name: simple ci
 on: 
   push:
     branches:
-      - origin
+      - main
 
 jobs:
   simple-ci:
