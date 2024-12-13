@@ -77,26 +77,32 @@ jobs:
           name: my-artifact-Build
           path: file-Build.txt
 
-          #access EC2 INSTA
-      - name: "Run SSH"
+      - name: Run SSH
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-            echo "$SSH_KEY" > ssh_key & chmod 600 ssh_key
-            ssh -o StrictHostKeyChecking=no -i ssh_key ssh -i ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com '
+          echo "$SSH_KEY" > ssh_key
+          chmod 600 ssh_key
+          # Run commands on EC2
+          ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@ec2-16-171-1-114.eu-north-1.compute.amazonaws.com << 'EOF'
+            # Update the system and install Docker
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates curl
+            sudo install -m 0755 -d /etc/apt/keyrings
+            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+            sudo chmod a+r /etc/apt/keyrings/docker.asc
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            
+            # Clean up Docker
+            sudo docker system prune -a --force
+            sudo docker image prune -a --force
 
-            sudo apt-get update &&
-            sudo apt-get install -y ca-certificates curl &&
-            sudo install -m 0755 -d /etc/apt/keyrings &&
-            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc &&
-            sudo chmod a+r /etc/apt/keyrings/docker.asc &&
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
-            sudo apt-get update &&
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
-            sudo docker system prune -a --force &&
-            sudo docker image prune -a --force &&
-            sudo docker pull oluwaseun7/simple-ci:latest &&
-            sudo docker run -d -p 8080:80 dapper01/practice-image:1
+            # Pull and run the Docker image
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1
+            sudo docker run -d -p 8080:80 ${{ secrets.DOCKERHUB_USERNAME }}/practice-image:1
+          EOF
 
   Deploy:
     needs: Build  # Corrected dependency to Build job
